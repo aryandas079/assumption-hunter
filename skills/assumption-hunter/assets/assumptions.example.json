@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "project_id": "receipt-queue-demo",
+  "audited_at": "2026-11-23T06:00:00Z",
+  "assumptions": [
+    {
+      "id": "ASM-001",
+      "statement": "Redelivery of the same invoice job creates at most one receipt per invoice.",
+      "category": "hypothesis",
+      "status": "untested",
+      "impact": 5,
+      "uncertainty": 5,
+      "test_cost": 2,
+      "source_locations": [
+        {
+          "path": "examples/receipt-queue.md",
+          "line_start": 3,
+          "line_end": 4
+        }
+      ],
+      "evidence": [],
+      "consequence": "Duplicate receipts could be sent to customers after a worker retry.",
+      "falsification_test": {
+        "procedure": "Deliver the same synthetic invoice job twice in a staging fixture and count receipt records.",
+        "expected_observation": "Exactly one receipt record exists for the invoice.",
+        "failure_criterion": "The fixture contains more than one receipt for the invoice.",
+        "prerequisites": "Use a staging queue and a synthetic invoice with outgoing email disabled.",
+        "estimated_effort": "20 minutes",
+        "execution_status": "not_run"
+      },
+      "mitigation": "Deduplicate receipt writes by invoice ID before enabling queue retries.",
+      "last_changed_reason": "Extracted from the initial design."
+    },
+    {
+      "id": "ASM-002",
+      "statement": "The receipt worker drains a burst of 200 queued jobs in under ten minutes in staging.",
+      "category": "hypothesis",
+      "status": "untested",
+      "impact": 3,
+      "uncertainty": 4,
+      "test_cost": 2,
+      "source_locations": [
+        {
+          "path": "examples/receipt-queue.md",
+          "line_start": 5,
+          "line_end": 5
+        }
+      ],
+      "evidence": [],
+      "falsification_test": {
+        "procedure": "Queue 200 synthetic jobs and time the interval until the last successful completion.",
+        "failure_criterion": "The last job completes at or after ten minutes, or a job fails.",
+        "prerequisites": "Use a staging worker with the planned worker count.",
+        "execution_status": "not_run"
+      },
+      "mitigation": "Provision additional workers or reduce the size of each import.",
+      "last_changed_reason": "Extracted from the initial design."
+    }
+  ]
+}

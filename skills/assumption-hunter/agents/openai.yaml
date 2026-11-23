@@ -1,0 +1,4 @@
+interface:
+  display_name: "Assumption Hunter"
+  short_description: "Audit hidden assumptions and trace evidence"
+  default_prompt: "Use $assumption-hunter to stress-test this plan and propose a check for the most fragile premise."

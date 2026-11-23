@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Assumption Hunter snapshot 1.0.0",
+  "type": "object",
+  "required": ["schema_version", "project_id", "audited_at", "assumptions"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "project_id": { "$ref": "#/$defs/text" },
+    "audited_at": { "$ref": "#/$defs/utc" },
+    "assumptions": { "type": "array", "items": { "$ref": "#/$defs/assumption" } }
+  },
+  "$defs": {
+    "text": { "type": "string", "pattern": "\\S" },
+    "optionalText": { "anyOf": [ { "$ref": "#/$defs/text" }, { "type": "null" } ] },
+    "utc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?(Z|\\+00:00)$"
+    },
+    "score": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "location": {
+      "type": "object",
+      "required": ["path", "line_start", "line_end"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/:\\\\<>\"|?*\\u0000-\\u001f\\u007f]+(?:/[^/:\\\\<>\"|?*\\u0000-\\u001f\\u007f]+)*$"
+        },
+        "line_start": { "type": "integer", "minimum": 1 },
+        "line_end": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["kind", "source", "summary", "verified_by", "observed_at"],
+      "properties": {
+        "kind": { "enum": ["support", "contradict"] },
+        "source": { "$ref": "#/$defs/optionalText" },
+        "summary": { "$ref": "#/$defs/text" },
+        "verified_by": { "$ref": "#/$defs/optionalText" },
+        "observed_at": { "anyOf": [ { "$ref": "#/$defs/utc" }, { "type": "null" } ] }
+      }
+    },
+    "test": {
+      "type": "object",
+      "required": ["procedure", "failure_criterion", "prerequisites", "execution_status"],
+      "properties": {
+        "procedure": { "$ref": "#/$defs/text" },
+        "failure_criterion": { "$ref": "#/$defs/text" },
+        "prerequisites": { "$ref": "#/$defs/text" },
+        "expected_observation": { "$ref": "#/$defs/text" },
+        "estimated_effort": { "$ref": "#/$defs/text" },
+        "execution_status": { "enum": ["not_run", "passed", "failed", "inconclusive"] }
+      }
+    },
+    "assumption": {
+      "type": "object",
+      "required": ["id", "statement", "category", "status", "impact", "uncertainty", "test_cost",
+                   "source_locations", "evidence", "falsification_test", "mitigation"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^ASM-[0-9]{3,12}$" },
+        "statement": { "$ref": "#/$defs/text" },
+        "category": { "enum": ["observed", "inferred", "hypothesis", "preference", "unknown"] },
+        "status": { "enum": ["untested", "supported", "contradicted", "inconclusive", "not_testable"] },
+        "impact": { "$ref": "#/$defs/score" },
+        "uncertainty": { "$ref": "#/$defs/score" },
+        "test_cost": { "$ref": "#/$defs/score" },
+        "source_locations": { "type": "array", "items": { "$ref": "#/$defs/location" } },
+        "evidence": { "type": "array", "items": { "$ref": "#/$defs/evidence" } },
+        "mitigation": { "$ref": "#/$defs/text" },
+        "consequence": { "$ref": "#/$defs/optionalText" },
+        "last_changed_reason": { "$ref": "#/$defs/optionalText" }
+      },
+      "if": { "properties": { "status": { "const": "not_testable" } } },
+      "then": {
+        "properties": { "falsification_test": { "anyOf": [ { "$ref": "#/$defs/test" }, { "type": "null" } ] } }
+      },
+      "else": { "properties": { "falsification_test": { "$ref": "#/$defs/test" } } }
+    }
+  }
+}

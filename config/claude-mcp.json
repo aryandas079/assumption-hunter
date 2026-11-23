@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "assumption-hunter": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "run", "--locked", "--no-dev", "--extra", "mcp",
+        "--project", "${CLAUDE_PLUGIN_ROOT}",
+        "python", "${CLAUDE_PLUGIN_ROOT}/skills/assumption-hunter/scripts/mcp_server.py"
+      ]
+    }
+  }
+}

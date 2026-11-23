@@ -1,0 +1,11 @@
+{
+  "name": "assumption-hunter-marketplace",
+  "owner": { "name": "Aryan Das" },
+  "plugins": [
+    {
+      "name": "assumption-hunter",
+      "description": "Evidence-driven assumption audits and local snapshot helpers.",
+      "source": "./"
+    }
+  ]
+}

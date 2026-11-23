@@ -1,0 +1,8 @@
+{
+  "name": "assumption-hunter",
+  "version": "0.1.0",
+  "description": "Audit hidden assumptions, trace evidence, and re-check decisions.",
+  "homepage": "https://github.com/aryandas079/assumption-hunter",
+  "license": "MIT",
+  "mcpServers": "./config/claude-mcp.json"
+}

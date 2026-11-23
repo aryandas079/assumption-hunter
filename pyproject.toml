@@ -1,0 +1,28 @@
+[project]
+name = "assumption-hunter"
+version = "0.1.0"
+description = "Agent Skill and local MCP tools for evidence-driven assumption audits"
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.26,<2"]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "ruff>=0.11,<1", "pyyaml>=6,<7", "jsonschema>=4.23,<5"]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["skills/assumption-hunter/scripts"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 115
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

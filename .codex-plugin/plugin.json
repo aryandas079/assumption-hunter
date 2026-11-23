@@ -1,0 +1,14 @@
+{
+  "name": "assumption-hunter",
+  "version": "0.1.0",
+  "description": "Audit hidden assumptions, trace evidence, and re-check decisions.",
+  "homepage": "https://github.com/aryandas079/assumption-hunter",
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./config/codex-mcp.json",
+  "interface": {
+    "displayName": "Assumption Hunter",
+    "shortDescription": "Audit hidden premises and map them to evidence",
+    "category": "Productivity"
+  }
+}
