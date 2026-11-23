@@ -1,6 +1,6 @@
 {
   "name": "assumption-hunter",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Audit hidden assumptions, trace evidence, and re-check decisions.",
   "author": { "name": "Aryan Das" },
   "homepage": "https://github.com/aryandas079/assumption-hunter",

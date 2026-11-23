@@ -22,6 +22,8 @@ codex plugin add assumption-hunter@assumption-hunter-marketplace
 
 Open a new Codex session and type `$assumption-hunter`.
 
+If a Windows reinstall reports a cache access error, run `codex plugin list --marketplace assumption-hunter-marketplace --json`. If Assumption Hunter is installed and enabled, start a new session to use it. Before updating an older install, exit Codex sessions that use Assumption Hunter so Windows can release the cached files.
+
 ### Claude Code
 
 Run inside a Claude Code session:

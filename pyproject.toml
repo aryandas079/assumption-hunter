@@ -1,6 +1,6 @@
 [project]
 name = "assumption-hunter"
-version = "0.1.0"
+version = "0.1.1"
 description = "Agent Skill and local MCP tools for evidence-driven assumption audits"
 license = { file = "LICENSE" }
 readme = "README.md"

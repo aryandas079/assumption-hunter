@@ -1,7 +1,11 @@
 import asyncio
+import json
+import os
+import shutil
 import sys
 
-from conftest import INITIAL, SCRIPTS, UPDATED
+import pytest
+from conftest import INITIAL, ROOT, SCRIPTS, SKILL, UPDATED
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
@@ -48,3 +52,39 @@ def test_mcp_stdio_round_trip(tmp_path):
                 assert list(tmp_path.iterdir()) == []
 
     asyncio.run(asyncio.wait_for(check(), timeout=25))
+
+
+def test_portable_plugin_uses_separate_data_directory(tmp_path):
+    uv = shutil.which("uv")
+    if uv is None:
+        pytest.skip("uv is required to launch the bundled MCP server")
+    package = tmp_path / "plugin package"
+    data = tmp_path / "plugin data"
+    data.mkdir()
+    shutil.copytree(SKILL, package / "skills" / SKILL.name, ignore=shutil.ignore_patterns("__pycache__"))
+    for filename in ("pyproject.toml", "uv.lock", "README.md", "LICENSE"):
+        shutil.copy2(ROOT / filename, package / filename)
+    config = json.loads((ROOT / "mcp.json").read_text(encoding="utf-8"))
+    definition = config["mcpServers"]["assumption_hunter"]
+
+    def resolve(value: str) -> str:
+        return value.replace("${PLUGIN_ROOT}", str(package)).replace("${PLUGIN_DATA}", str(data))
+
+    environment = {key: resolve(value) for key, value in definition["env"].items()}
+    environment.update(UV_OFFLINE="1", UV_PYTHON=sys.executable)
+    if "UV_CACHE_DIR" in os.environ:
+        environment["UV_CACHE_DIR"] = os.environ["UV_CACHE_DIR"]
+    params = StdioServerParameters(
+        command=uv, args=list(map(resolve, definition["args"])),
+        cwd=resolve(definition["cwd"]), env=environment,
+    )
+
+    async def check():
+        async with stdio_client(params) as (reader, writer):
+            async with ClientSession(reader, writer) as session:
+                await session.initialize()
+                assert (data / "venv" / "pyvenv.cfg").is_file()
+                assert not (package / ".venv").exists()
+                assert not list(package.rglob("__pycache__"))
+
+    asyncio.run(asyncio.wait_for(check(), timeout=45))
