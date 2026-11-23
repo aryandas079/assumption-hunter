@@ -11,7 +11,9 @@ The plugins include the skill and a local MCP server. Install [uv](https://docs.
 
 ### Codex CLI
 
-Run in your terminal:
+Install the [Codex CLI](https://learn.chatgpt.com/docs/cli) and check that `codex --version` works in your terminal. On Windows with Node.js installed, you can install the CLI with `npm.cmd install -g @openai/codex`. Open a new PowerShell window after installation so it picks up your PATH.
+
+Then run:
 
 ```sh
 codex plugin marketplace add aryandas079/assumption-hunter
