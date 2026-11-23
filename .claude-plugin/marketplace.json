@@ -1,5 +1,6 @@
 {
   "name": "assumption-hunter-marketplace",
+  "description": "Assumption Hunter skill and local MCP tools for evidence-driven audits.",
   "owner": { "name": "Aryan Das" },
   "plugins": [
     {

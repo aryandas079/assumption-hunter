@@ -33,7 +33,7 @@ Invoke `/assumption-hunter:assumption-hunter`. The plugin includes the MCP serve
 
 ### Codex or Claude Code manual install
 
-Clone the repository and copy the entire `skills/assumption-hunter` folder into your destination. The skill instructions can run without Python. The offline scripts require Python 3.11 or later.
+Clone the repository and copy the entire `skills/assumption-hunter` folder into your destination, or extract it from the [skill ZIP](https://github.com/aryandas079/assumption-hunter/releases/latest/download/assumption-hunter-skill.zip). The skill instructions can run without Python. The offline scripts require Python 3.11 or later.
 
 | Host | Project destination | Invocation |
 | --- | --- | --- |
