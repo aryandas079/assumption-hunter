@@ -1,27 +1,28 @@
 # Assumption Hunter
 
 [![CI](https://github.com/aryandas079/assumption-hunter/actions/workflows/ci.yml/badge.svg)](https://github.com/aryandas079/assumption-hunter/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Assumption Hunter is an Agent Skill for Codex and Claude Code. It audits the premises behind a plan, codebase, or research proposal, connects them to evidence, and proposes the smallest check that could change a decision. When you rerun an audit, it can compare snapshots and show which conclusions changed.
+Find the assumptions that could derail a plan, design, or research proposal. Assumption Hunter helps Codex and Claude Code cite evidence for each premise, flag the most consequential unknowns, and propose a test that could change the decision. Save snapshots to see what changes on the next audit.
 
-The host performs the audit. The bundled Python tools provide deterministic validation, ranking, and comparison. The optional local MCP server exposes the same operations alongside the audit guide.
+## Install
 
-## Install the skill
+The plugins include the skill and a local MCP server. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and make sure it is on your PATH before starting your host.
 
-### Codex CLI plugin
+### Codex CLI
 
-With [uv](https://docs.astral.sh/uv/getting-started/installation/) on your PATH, run:
+Run in your terminal:
 
 ```sh
 codex plugin marketplace add aryandas079/assumption-hunter
 codex plugin add assumption-hunter@assumption-hunter-marketplace
 ```
 
-Open a new session and invoke `$assumption-hunter`. The plugin bundles the MCP server. Use the manual install for the skill alone or for a host without plugin support. [Codex plugin packaging](https://developers.openai.com/plugins/build/plugins)
+Open a new Codex session and type `$assumption-hunter`.
 
-### Claude Code plugin
+### Claude Code
 
-With [uv](https://docs.astral.sh/uv/getting-started/installation/) on your PATH, run these commands inside Claude Code:
+Run inside a Claude Code session:
 
 ```text
 /plugin marketplace add aryandas079/assumption-hunter
@@ -29,111 +30,51 @@ With [uv](https://docs.astral.sh/uv/getting-started/installation/) on your PATH,
 /reload-plugins
 ```
 
-Invoke `/assumption-hunter:assumption-hunter`. The plugin includes the MCP server. Its first launch can download Python and locked dependencies if needed. Use the manual install below for the skill alone. [Claude Code plugin docs](https://code.claude.com/docs/en/plugins)
+Type `/assumption-hunter:assumption-hunter`.
 
-### Codex or Claude Code manual install
+### Install just the skill
 
-Clone the repository and copy the entire `skills/assumption-hunter` folder into your destination, or extract it from the [skill ZIP](https://github.com/aryandas079/assumption-hunter/releases/latest/download/assumption-hunter-skill.zip). The skill instructions can run without Python. The offline scripts require Python 3.11 or later.
+Download and extract the [skill ZIP](https://github.com/aryandas079/assumption-hunter/releases/latest/download/assumption-hunter-skill.zip). Copy the entire `assumption-hunter` folder into one of these locations inside the project you want to audit, then start a new session in that project.
 
-| Host | Project destination | Invocation |
+| Host | Project location | Invoke |
 | --- | --- | --- |
-| Codex | `.agents/skills/assumption-hunter/` | `$assumption-hunter` |
+| Codex CLI or IDE | `.agents/skills/assumption-hunter/` | `$assumption-hunter` |
 | Claude Code | `.claude/skills/assumption-hunter/` | `/assumption-hunter` |
 
-For example, from the **project you want to audit** on PowerShell:
+The instructions work on their own. The offline scripts require Python 3.11 or later. If you clone the repo, the folder to copy is [`skills/assumption-hunter`](skills/assumption-hunter).
 
-```powershell
-git clone https://github.com/aryandas079/assumption-hunter.git ../assumption-hunter
-New-Item -ItemType Directory -Force .agents/skills | Out-Null
-Copy-Item -Recurse ../assumption-hunter/skills/assumption-hunter .agents/skills/
-```
+## Run your first audit
 
-On macOS or Linux:
+> Use Assumption Hunter to stress-test this plan. Cite the evidence for each critical premise and suggest the smallest test that could change our decision.
 
-```sh
-git clone https://github.com/aryandas079/assumption-hunter.git ../assumption-hunter
-mkdir -p .agents/skills
-cp -R ../assumption-hunter/skills/assumption-hunter .agents/skills/
-```
+Ask it to save a snapshot if you want to track changes. On a later audit, provide the previous snapshot and ask what changed and why. The CLI can preserve history in the project's `.assumption-hunter/` directory. [Snapshot format and save commands](skills/assumption-hunter/references/state-format.md)
 
-Use `.claude/skills/` in place of `.agents/skills/` for Claude Code. Open a fresh host session in the audited project. In ChatGPT Work or Claude on the web, custom skill availability and execution permissions depend on the account and surface. Where an import is offered, use the skill folder or its ZIP for the instructions. Local stdio MCP requires a host that can launch a local process. [Codex skills](https://learn.chatgpt.com/docs/build-skills) · [Claude Code skills](https://code.claude.com/docs/en/skills) · [Claude custom skill upload](https://support.claude.com/en/articles/12512198-how-to-create-custom-skills)
+To see a complete example, read the [synthetic receipt queue design](examples/receipt-queue.md). The [first snapshot](skills/assumption-hunter/assets/assumptions.example.json) marks duplicate receipts as a possibility. The [updated snapshot](examples/updated.json) records a staged redelivery that produced two receipt rows.
 
-## Connect the MCP server
+## Use MCP on its own
 
-Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and run the following from the **Assumption Hunter clone**. Choose the command for your host. Skip this step if you installed a bundled plugin.
-
-PowerShell:
-
-```powershell
-$repo = (Get-Location).Path
-$server = Join-Path $repo "skills/assumption-hunter/scripts/mcp_server.py"
-codex mcp add assumption-hunter -- uv run --locked --no-dev --extra mcp --project "$repo" python "$server"
-# Or, for Claude Code
-claude mcp add --transport stdio --scope user assumption-hunter -- uv run --locked --no-dev --extra mcp --project "$repo" python "$server"
-```
-
-macOS or Linux:
+If you installed a bundled plugin, its MCP server is already configured. For another local stdio client, clone the repo and configure the command below. Replace `/path/to/assumption-hunter` with the absolute path to your clone in both arguments.
 
 ```sh
-repo="$(pwd -P)"
-server="$repo/skills/assumption-hunter/scripts/mcp_server.py"
-codex mcp add assumption-hunter -- uv run --locked --no-dev --extra mcp --project "$repo" python "$server"
-# Or, for Claude Code
-claude mcp add --transport stdio --scope user assumption-hunter -- uv run --locked --no-dev --extra mcp --project "$repo" python "$server"
+uv run --locked --no-dev --extra mcp --project "/path/to/assumption-hunter" python "/path/to/assumption-hunter/skills/assumption-hunter/scripts/mcp_server.py"
 ```
 
-Check `codex mcp list` or `claude mcp list` and open a new session. For another stdio-compatible client, configure command `uv` and arguments `["run", "--locked", "--no-dev", "--extra", "mcp", "--project", "<absolute clone path>", "python", "<absolute server script path>"]`. Use `get_audit_guide` in clients that surface tools only. [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) · [Claude Code MCP](https://code.claude.com/docs/en/mcp)
+For Codex, prefix the command with `codex mcp add assumption_hunter --`. For Claude Code, prefix it with `claude mcp add --transport stdio --scope user assumption_hunter --`. Open a new host session after registering it. [Codex MCP setup](https://learn.chatgpt.com/docs/extend/mcp?surface=cli) · [Claude Code MCP setup](https://code.claude.com/docs/en/mcp)
 
-| MCP capability | Inputs and output |
-| --- | --- |
-| `get_audit_guide` | Optional `section` such as `state`, `methodology`, or `sample`. Returns bundled content. |
-| `validate_audit_snapshot` | `snapshot_json` as JSON text. Returns validation and count. |
-| `rank_audit_assumptions` | `snapshot_json` as JSON text. Returns ranked IDs and score details. |
-| `compare_audit_snapshots` | `old_snapshot_json` and `new_snapshot_json` as JSON text. Returns changed IDs, fields, statuses, and priorities. |
-| `audit_assumptions` | Reusable MCP prompt with the audit workflow. |
-| MCP resources | `assumption-hunter://guide/workflow`, `assumption-hunter://guide/state`, and `assumption-hunter://assets/example`. |
+The server exposes `get_audit_guide`, `validate_audit_snapshot`, `rank_audit_assumptions`, and `compare_audit_snapshots`. It takes snapshot JSON text and reads only its bundled guides. The host interprets evidence and makes audit judgments.
 
-The MCP runtime reads bundled guides and processes supplied JSON in memory. It accepts no arbitrary filesystem paths, commands, URLs to fetch, or state-changing operations. The first `uv` launch can install dependencies. Subsequent runs can use `--offline` after the dependencies are available. The host's own permissions and data policies still apply, including whether it sends audit text to its model provider.
+## Development
 
-## Try an audit
-
-- “Use Assumption Hunter to audit our queue retry design. Cite the relevant source and propose a staging check for the highest-impact premise.”
-- “Stress-test this research proposal. Check whether the sample and baseline support the conclusion, and identify what result would overturn it.”
-- “Re-audit the revised design against my previous snapshot. Tell me which assumptions changed and what new evidence explains each change.”
-
-Try the offline tools from the repository root. On Windows, use `py -3` in place of `python` if that is your Python launcher.
-
-```sh
-python skills/assumption-hunter/scripts/validate_state.py skills/assumption-hunter/assets/assumptions.example.json
-python skills/assumption-hunter/scripts/rank_assumptions.py skills/assumption-hunter/assets/assumptions.example.json
-python skills/assumption-hunter/scripts/compare_snapshots.py skills/assumption-hunter/assets/assumptions.example.json examples/updated.json
-```
-
-In the [synthetic receipt queue audit](examples/receipt-queue.md), a staging record shows two receipt rows for one invoice after redelivery. The comparison identifies `ASM-001` as moving from `untested` to `contradicted`. The queue throughput premise remains untested.
-
-Use `--json` for structured ranking or comparison. The comparison can create a new report with `--output report.md`, or use `--json --output report.json`. The destination must be a new relative path inside the working directory. The CLI refuses to overwrite reports.
-
-### Save and re-audit
-
-When you want persistent state, ask the host to save the snapshot, or run:
-
-```sh
-python skills/assumption-hunter/scripts/save_snapshot.py first-audit.json --project .
-python skills/assumption-hunter/scripts/save_snapshot.py revised-audit.json --project . --base 2026-11-23T06:00:00Z
-```
-
-Use the real `audited_at` from the current snapshot as `--base`. The helper preserves previous snapshots in `.assumption-hunter/history/` and writes the latest to `.assumption-hunter/assumptions.json`. Ignore `.assumption-hunter/` in the audited project's version control if it holds private material. For comparisons without persistence, pass both snapshots to the CLI or MCP server. [State schema and conventions](skills/assumption-hunter/references/state-format.md)
-
-## Review and development
-
-An audit can surface uncertain or contradictory claims. Its accuracy depends on the inspected evidence, and the schema validator only verifies shape and invariants. Review conclusions and experiment thresholds before acting. Audits and re-audits run on demand. The skill treats instructions embedded in evidence as data and requires user authorization for write operations and external transfers.
+From the repository root:
 
 ```sh
 uv sync --locked --extra mcp
-uv run --locked --extra mcp pytest -q
 uv run --locked --extra mcp ruff check .
+uv run --locked --extra mcp pytest -q
 ```
 
-The test suite covers malformed snapshots, source paths, scoring, diffs, persistence, and real MCP stdio calls. Use the [synthetic evaluation cases](examples/evaluation.md) to review audit quality with a host model.
+[Audit methodology](skills/assumption-hunter/references/methodology.md) · [Evidence policy](skills/assumption-hunter/references/evidence-policy.md) · [Evaluation cases](examples/evaluation.md)
 
-[MIT License](LICENSE) · [Agent Skills specification](https://agentskills.io/specification)
+## License
+
+Assumption Hunter is open source under the [MIT License](LICENSE).
